@@ -7,32 +7,36 @@ function App() {
   const [city, setCity] = useState("Kenya");
   const [cityData, setCityData] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [curW, setCurw] = useState([]);
+  const [curW, setCurw] = useState({});
   const apiKey = process.env.REACT_APP_API_KEY;
 
   useEffect(() => {
     const successfulLookup = (position) => {
       const { latitude, longitude } = position.coords;
-      Axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&units=imperial&appid=${apiKey}`
-      ).then((res) => {
-        console.log(res.data.city);
-        const reading = res.data.list.filter((dt) =>
-          dt.dt_txt.includes("18:00:00")
-        );
-        console.log(reading);
-        setCityData(reading);
-      });
       //current weather
       Axios.get(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
       ).then((res) => {
-        console.log(res.data);
-        setCurw("hhhh", res.data);
+        setCity(() => cityData.concat(res.data));
+      });
+
+      Axios.get(
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&units=imperial&appid=${apiKey}`
+      ).then((res) => {
+        const reading = res.data.list.filter((dt) =>
+          dt.dt_txt.includes("18:00:00")
+        );
+        setCityData(() => cityData.concat(reading));
+        console.log(cityData);
       });
     };
 
     const unSuccessful = () => {
+      Axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
+      ).then((res) => {
+        console.log(res.data);
+      });
       Axios.get(
         `https://api.openweathermap.org/data/2.5/forecast?q=London&units=imperial&appid=${apiKey}`
       ).then((res) => {
@@ -40,16 +44,10 @@ function App() {
         const reading = res.data.list.filter((dt) =>
           dt.dt_txt.includes("18:00:00")
         );
-        console.log(reading);
-        setCityData(reading);
+        setCityData(() => cityData.concat(reading));
+        console.log("unsii", cityData);
       });
       //current weather
-      Axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
-      ).then((res) => {
-        console.log(res.data);
-        setCurw(res.data);
-      });
     };
     const options = {
       enableHighAccuracy: true,
@@ -110,7 +108,7 @@ function App() {
           </span> */}
         </p>
 
-        {cityData.length > 0 ? (
+        {/* {cityData.length > 0 ? (
           <div className="p-6 mx-4">
             <p className="py-6">
               {new Date(cityData[activeIndex].dt * 1000).toLocaleTimeString(
@@ -152,7 +150,7 @@ function App() {
           </div>
         ) : (
           "Loading...."
-        )}
+        )} */}
       </div>
       <div className="col-span-2 grid grid-rows-2 ">
         <div className="">
@@ -173,7 +171,7 @@ function App() {
           />{" "} */}
         </div>
         <div className="flex">
-          <div className="p-6 mx-4 flex flex-col justify-center text-center items-center">
+          {/* <div className="p-6 mx-4 flex flex-col justify-center text-center items-center">
             <p>{new Date(curW.dt * 1000).toDateString("en-US")}</p>
             <img
               src={`http://openweathermap.org/img/wn/${curW.weather[0].icon}@2x.png
@@ -183,7 +181,7 @@ function App() {
             <p>
               Humidity <br /> {curW.main.humidity}%
             </p>
-          </div>
+          </div> */}
 
           {cityData.map((cityd, citydIndex) => (
             <div
