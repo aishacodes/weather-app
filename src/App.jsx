@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Axios from "axios";
 import "./App.css";
-// import { Line } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 
 function App() {
   const [city, setCity] = useState("Kenya");
@@ -88,17 +88,16 @@ function App() {
       console.log("unsiihhhh", cityData);
     });
   }, [city]);
-
-  const tempGraph = {
-    labels: ["January", "February", "March", "April", "May"],
+  const state = {
+    labels: cityData.map((t) => new Date(t.dt * 1000).toDateString("en-US")),
     datasets: [
       {
-        label: "Rainfall",
-        fill: true,
-        lineTension: 0.5,
-        backgroundColor: "rgba(75,192,192,1)",
-        borderColor: "rgba(0,0,0,1)",
+        label: "Temperature",
+        backgroundColor: "#eef2ffff",
+        borderColor: "#5a7df9ff",
         borderWidth: 2,
+        pointRadius: 5,
+        pointBackgroundColor: "#5a7df9ff",
         data: cityData.map((t) => t.main.temp),
       },
     ],
@@ -167,22 +166,28 @@ function App() {
         )}
       </div>
       <div className="col-span-2 grid grid-rows-2 ">
-        <div className="">
+        <div className="h-1/2">
           <p>Temperature</p>
-          {/* <Line
-            data={tempGraph}
+          <Line
+            data={state}
             options={{
-              title: {
-                display: true,
-                text: "Temperature",
-                fontSize: 20,
-              },
               legend: {
-                display: true,
-                position: "right",
+                display: false,
+              },
+              scales: {
+                xAxes: [
+                  {
+                    display: false,
+                  },
+                ],
+                yAxes: [
+                  {
+                    display: false,
+                  },
+                ],
               },
             }}
-          />{" "} */}
+          />
         </div>
         <div className="flex">
           {cityData.map((cityd, citydIndex) => (
