@@ -7,7 +7,7 @@ function App() {
   const [city, setCity] = useState("Kenya");
   const [cityData, setCityData] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [curW, setCurw] = useState({});
+  const [curW, setCurw] = useState([]);
   const apiKey = process.env.REACT_APP_API_KEY;
 
   useEffect(() => {
@@ -32,11 +32,16 @@ function App() {
     };
 
     const unSuccessful = () => {
+      // current weather
+
       Axios.get(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
       ).then((res) => {
-        console.log(res.data);
+        setCityData([res.data]);
       });
+      console.log(cityData, "preev cittttyyyy");
+
+      // forecast;
       Axios.get(
         `https://api.openweathermap.org/data/2.5/forecast?q=London&units=imperial&appid=${apiKey}`
       ).then((res) => {
@@ -44,10 +49,11 @@ function App() {
         const reading = res.data.list.filter((dt) =>
           dt.dt_txt.includes("18:00:00")
         );
-        setCityData(() => cityData.concat(reading));
-        console.log("unsii", cityData);
+        setCityData((we) =>
+          we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
+        );
       });
-      //current weather
+      console.log("unsiihhhh", cityData);
     };
     const options = {
       enableHighAccuracy: true,
@@ -64,14 +70,22 @@ function App() {
 
   useEffect(() => {
     Axios.get(
-      `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
+    ).then((res) => {
+      setCityData([res.data]);
+    });
+    console.log(cityData, "preev cittttyyyy");
+
+    // forecast;
+    Axios.get(
+      `https://api.openweathermap.org/data/2.5/forecast?q=London&units=imperial&appid=${apiKey}`
     ).then((res) => {
       console.log(res.data.city);
       const reading = res.data.list.filter((dt) =>
         dt.dt_txt.includes("18:00:00")
       );
-      console.log(reading);
-      setCityData(reading);
+      setCityData((we) => we.concat(reading));
+      console.log("unsiihhhh", cityData);
     });
   }, [city]);
 
@@ -108,7 +122,7 @@ function App() {
           </span> */}
         </p>
 
-        {/* {cityData.length > 0 ? (
+        {cityData.length > 0 ? (
           <div className="p-6 mx-4">
             <p className="py-6">
               {new Date(cityData[activeIndex].dt * 1000).toLocaleTimeString(
@@ -150,7 +164,7 @@ function App() {
           </div>
         ) : (
           "Loading...."
-        )} */}
+        )}
       </div>
       <div className="col-span-2 grid grid-rows-2 ">
         <div className="">
@@ -171,18 +185,6 @@ function App() {
           />{" "} */}
         </div>
         <div className="flex">
-          {/* <div className="p-6 mx-4 flex flex-col justify-center text-center items-center">
-            <p>{new Date(curW.dt * 1000).toDateString("en-US")}</p>
-            <img
-              src={`http://openweathermap.org/img/wn/${curW.weather[0].icon}@2x.png
-`}
-              alt=""
-            />
-            <p>
-              Humidity <br /> {curW.main.humidity}%
-            </p>
-          </div> */}
-
           {cityData.map((cityd, citydIndex) => (
             <div
               className={`p-6 mx-4 flex flex-col justify-center text-center items-center ${
@@ -192,8 +194,7 @@ function App() {
             >
               <p>{new Date(cityd.dt * 1000).toDateString("en-US")}</p>
               <img
-                src={`http://openweathermap.org/img/wn/${cityd.weather[0].icon}@2x.png
-`}
+                src={`http://openweathermap.org/img/wn/${cityd.weather[0].icon}@2x.png`}
                 alt=""
               />
               <p>
