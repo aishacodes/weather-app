@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Axios from "axios";
 import "./App.css";
 import { Line } from "react-chartjs-2";
+import Loader from "./Loader";
 
 function App() {
   const [city, setCity] = useState("Kenya");
@@ -162,7 +163,7 @@ function App() {
             </div>
           </div>
         ) : (
-          "Loading...."
+          <Loader />
         )}
       </div>
       <div className="col-span-2 grid grid-rows-2 ">
