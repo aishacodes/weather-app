@@ -1,52 +1,48 @@
 import { useState, useEffect } from "react";
-import Axios from "axios";
-import "./App.css";
 import { Line } from "react-chartjs-2";
-import Loader from "./Loader";
+import Loader from "./Component/Loader";
+import weatherServices from "./Services/weatherServices";
+
+import "./App.css";
 
 function App() {
-  const [city, setCity] = useState("Kenya");
+  const [city, setCity] = useState("");
+  const [cityName, setCityName] = useState("");
   const [cityData, setCityData] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [curW, setCurw] = useState([]);
-  const apiKey = process.env.REACT_APP_API_KEY;
-
+  const [searchInput, setSearchInput] = useState("");
   useEffect(() => {
     const successfulLookup = (position) => {
       const { latitude, longitude } = position.coords;
       //current weather
-      Axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
-      ).then((res) => {
-        setCity(() => cityData.concat(res.data));
+      weatherServices.getCurrentWeather(latitude, longitude).then((res) => {
+        setCityData((prev) => [res.data]);
       });
-
-      Axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&units=imperial&appid=${apiKey}`
-      ).then((res) => {
-        const reading = res.data.list.filter((dt) =>
-          dt.dt_txt.includes("18:00:00")
-        );
-        setCityData(() => cityData.concat(reading));
-        console.log(cityData);
-      });
+      //forecast
+      weatherServices
+        .getForecastWeatherbyCoord(latitude, longitude)
+        .then((res) => {
+          console.log(res.data.city);
+          const reading = res.data.list.filter((dt) =>
+            dt.dt_txt.includes("18:00:00")
+          );
+          setCityData((we) =>
+            we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
+          );
+        });
     };
 
     const unSuccessful = () => {
       // current weather
-
-      Axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
-      ).then((res) => {
-        setCityData([res.data]);
+      weatherServices.getCurrentWeather("London").then((res) => {
+        console.log(res.data);
+        setCityName(res.data.name);
+        setCityData((prev) => [res.data]);
       });
-      console.log(cityData, "preev cittttyyyy");
 
-      // forecast;
-      Axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast?q=London&units=imperial&appid=${apiKey}`
-      ).then((res) => {
-        console.log(res.data.city);
+      // // forecast;
+      weatherServices.getForecastWeatherbyCity("London").then((res) => {
+        console.log(res.data);
         const reading = res.data.list.filter((dt) =>
           dt.dt_txt.includes("18:00:00")
         );
@@ -54,12 +50,10 @@ function App() {
           we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
         );
       });
-      console.log("unsiihhhh", cityData);
     };
     const options = {
       enableHighAccuracy: true,
       timeout: 10000,
-      maximumAge: 0,
     };
 
     window.navigator.geolocation.getCurrentPosition(
@@ -70,25 +64,24 @@ function App() {
   }, []);
 
   useEffect(() => {
-    Axios.get(
-      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
-    ).then((res) => {
-      setCityData([res.data]);
+    //current
+    weatherServices.getCurrentWeather(city).then((res) => {
+      console.log(res.data);
+      setCityData((prev) => [res.data]);
     });
-    console.log(cityData, "preev cittttyyyy");
 
-    // forecast;
-    Axios.get(
-      `https://api.openweathermap.org/data/2.5/forecast?q=London&units=imperial&appid=${apiKey}`
-    ).then((res) => {
-      console.log(res.data.city);
+    // // forecast;
+    weatherServices.getForecastWeatherbyCity(city).then((res) => {
+      console.log(res.data);
       const reading = res.data.list.filter((dt) =>
         dt.dt_txt.includes("18:00:00")
       );
-      setCityData((we) => we.concat(reading));
-      console.log("unsiihhhh", cityData);
+      setCityData((we) =>
+        we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
+      );
     });
   }, [city]);
+
   const state = {
     labels: cityData.map((t) => new Date(t.dt * 1000).toDateString("en-US")),
     datasets: [
@@ -105,23 +98,22 @@ function App() {
   };
 
   return (
-    <div className="App grid grid-cols-3 ">
+    <div className="App grid grid-cols-3 h-screen w-screen overflow-hidden">
       <div className="w-full py-4 px-6">
         <p className="flex items-center">
           <span className="text-2xl font-extrabold">Your City</span>
-          <input
-            type="text"
-            name=""
-            placeholder={city}
-            className="pr-6 pl-2 py-1 border border-gray-300 mx-6"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
-          {/* <span className="pr-9 pl-2 py-1 border border-gray-300 mx-6">
-            {city}
-          </span> */}
+          <form action="" onSubmit={(e) => setCity(e.target.searchInput.value)}>
+            <input
+              type="text"
+              name="searchInput"
+              placeholder="Enter your City"
+              className="pr-6 pl-2 py-1 border border-gray-300 mx-6"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </form>
         </p>
-
+        <span className="pr-9 pl-2 py-1 mx-6">{cityName}</span>
         {cityData.length > 0 ? (
           <div className="p-6 mx-4">
             <p className="py-6">
@@ -166,48 +158,55 @@ function App() {
           <Loader />
         )}
       </div>
-      <div className="col-span-2 grid grid-rows-2 ">
-        <div className="h-1/2">
+      <div className="col-span-2 w-full">
+        <div className="h-1/2 w-full">
           <p>Temperature</p>
-          <Line
-            data={state}
-            options={{
-              legend: {
-                display: false,
-              },
-              scales: {
-                xAxes: [
-                  {
-                    display: false,
-                  },
-                ],
-                yAxes: [
-                  {
-                    display: false,
-                  },
-                ],
-              },
-            }}
-          />
+          <div className="w-full h-16">
+            <Line
+              height={100}
+              data={state}
+              options={{
+                legend: {
+                  display: false,
+                },
+                scales: {
+                  xAxes: [
+                    {
+                      display: false,
+                    },
+                  ],
+                  yAxes: [
+                    {
+                      display: false,
+                    },
+                  ],
+                },
+              }}
+            />
+          </div>
         </div>
-        <div className="flex">
-          {cityData.map((cityd, citydIndex) => (
-            <div
-              className={`p-6 mx-4 flex flex-col justify-center text-center items-center ${
-                citydIndex === activeIndex ? "bg-blue-300" : "bg-white"
-              } `}
-              onClick={() => setActiveIndex(citydIndex)}
-            >
-              <p>{new Date(cityd.dt * 1000).toDateString("en-US")}</p>
-              <img
-                src={`http://openweathermap.org/img/wn/${cityd.weather[0].icon}@2x.png`}
-                alt=""
-              />
-              <p>
-                Humidity <br /> {cityd.main.humidity}%
-              </p>
-            </div>
-          ))}
+        <div className="flex overflow-x-auto">
+          {cityData.length ? (
+            cityData.map((cityd, citydIndex) => (
+              <div
+                className={`p-6 mx-4 flex flex-col justify-center text-center items-center shadow-lg ${
+                  citydIndex === activeIndex ? "bg-blue-300" : "bg-white"
+                } `}
+                onClick={() => setActiveIndex(citydIndex)}
+              >
+                <p>{new Date(cityd.dt * 1000).toDateString("en-US")}</p>
+                <img
+                  src={`http://openweathermap.org/img/wn/${cityd.weather[0].icon}@2x.png`}
+                  alt=""
+                />
+                <p>
+                  Humidity <br /> {cityd.main.humidity}%
+                </p>
+              </div>
+            ))
+          ) : (
+            <Loader />
+          )}
         </div>
       </div>
     </div>
