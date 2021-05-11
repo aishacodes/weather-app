@@ -3,7 +3,7 @@ const apiKey = process.env.REACT_APP_API_KEY;
 
 const getCurrentWeather = (city = null, latitude, longitude) => {
   let response;
-  if (city) {
+  if (city !== null) {
     response = Axios.get(
       `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
     );
