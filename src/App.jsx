@@ -27,14 +27,12 @@ function App() {
           const reading = res.data.list.filter((dt) =>
             dt.dt_txt.includes("18:00:00")
           );
-          setCityData((we) =>
-            we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
-          );
+          setCityData((we) => we.concat(reading));
         });
     };
 
     const unSuccessful = () => {
-      // current weather
+      //current
       weatherServices.getCurrentWeatherByCity("London").then((res) => {
         setCityData((prev) => [res.data]);
         setCityName(res.data.name);
@@ -42,13 +40,18 @@ function App() {
 
       // // forecast;
       weatherServices.getForecastWeatherbyCity("London").then((res) => {
-        // console.log(res.data.city.name);
-        const reading = res.data.list.filter((dt) =>
+        let reading = res.data.list.filter((dt) =>
           dt.dt_txt.includes("18:00:00")
         );
-        setCityData((we) =>
-          we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
-        );
+        // reading =
+        //   reading.length &&
+        //   reading.filter((read) => {
+        //     return (
+        //       new Date(cityData[0].dt * 1000).toDateString("en-US") !==
+        //       new Date(read.dt * 1000).toDateString("en-US")
+        //     );
+        //   });
+        setCityData((we) => we.concat(reading));
       });
     };
     const options = {
@@ -66,20 +69,23 @@ function App() {
   useEffect(() => {
     //current
     weatherServices.getCurrentWeatherByCity(city).then((res) => {
-      console.log(res.data);
       setCityData((prev) => [res.data]);
       setCityName(res.data.name);
     });
 
     // // forecast;
     weatherServices.getForecastWeatherbyCity(city).then((res) => {
-      console.log(res.data);
-      const reading = res.data.list.filter((dt) =>
+      let reading = res.data.list.filter((dt) =>
         dt.dt_txt.includes("18:00:00")
       );
-      setCityData((we) =>
-        we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
-      );
+
+      reading = reading.filter((read) => {
+        return (
+          new Date(cityData[0].dt * 1000).toDateString("en-US") !==
+          new Date(read.dt * 1000).toDateString("en-US")
+        );
+      });
+      setCityData((we) => we.concat(reading));
     });
   }, [city]);
 
@@ -113,9 +119,8 @@ function App() {
               onChange={(e) => setCity(e.target.value)}
             />
           </form>
-          {console.log(city)}
         </div>
-        <span className="pr-9 pl-2 py-1 mx-6">Current City {cityName}</span>
+        <span className="pr-9 py-1 mx-4">Current City {cityName}</span>
         {cityData.length > 0 ? (
           <div className="p-6 mx-4">
             <p className="py-6">
