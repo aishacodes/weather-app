@@ -10,88 +10,78 @@ function App() {
   const [cityName, setCityName] = useState("");
   const [cityData, setCityData] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  // const [searchInput, setSearchInput] = useState("");
 
-  // useEffect(() => {
-  //   const successfulLookup = (position) => {
-  //     const { latitude, longitude } = position.coords;
-  //     //current weather
-  //     weatherServices.getCurrentWeather(latitude, longitude).then((res) => {
-  //       setCityData((prev) => [res.data]);
-  //     });
-  //     //forecast
-  //     weatherServices
-  //       .getForecastWeatherbyCoord(latitude, longitude)
-  //       .then((res) => {
-  //         console.log(res.data.city);
-  //         const reading = res.data.list.filter((dt) =>
-  //           dt.dt_txt.includes("18:00:00")
-  //         );
-  //         setCityData((we) =>
-  //           we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
-  //         );
-  //       });
-  //   };
+  useEffect(() => {
+    const successfulLookup = (position) => {
+      const { latitude, longitude } = position.coords;
+      //current weather
+      weatherServices
+        .getCurrentWeatherByCoord(latitude, longitude)
+        .then((res) => {
+          setCityData((prev) => [res.data]);
+        });
+      //forecast
+      weatherServices
+        .getForecastWeatherbyCoord(latitude, longitude)
+        .then((res) => {
+          const reading = res.data.list.filter((dt) =>
+            dt.dt_txt.includes("18:00:00")
+          );
+          setCityData((we) =>
+            we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
+          );
+        });
+    };
 
-  //   const unSuccessful = () => {
-  //     // current weather
-  //     weatherServices.getCurrentWeather("London").then((res) => {
-  //       console.log(res.data);
-  //       setCityName(res.data.name);
-  //       setCityData((prev) => [res.data]);
-  //     });
+    const unSuccessful = () => {
+      // current weather
+      weatherServices.getCurrentWeatherByCity("London").then((res) => {
+        setCityData((prev) => [res.data]);
+        setCityName(res.data.name);
+      });
 
-  //     // // forecast;
-  //     weatherServices.getForecastWeatherbyCity("London").then((res) => {
-  //       console.log(res.data);
-  //       const reading = res.data.list.filter((dt) =>
-  //         dt.dt_txt.includes("18:00:00")
-  //       );
-  //       setCityData((we) =>
-  //         we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
-  //       );
-  //     });
-  //   };
-  //   const options = {
-  //     enableHighAccuracy: true,
-  //     timeout: 10000,
-  //   };
+      // // forecast;
+      weatherServices.getForecastWeatherbyCity("London").then((res) => {
+        // console.log(res.data.city.name);
+        const reading = res.data.list.filter((dt) =>
+          dt.dt_txt.includes("18:00:00")
+        );
+        setCityData((we) =>
+          we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
+        );
+      });
+    };
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+    };
 
-  //   window.navigator.geolocation.getCurrentPosition(
-  //     successfulLookup,
-  //     unSuccessful,
-  //     options
-  //   );
-  // }, []);
+    window.navigator.geolocation.getCurrentPosition(
+      successfulLookup,
+      unSuccessful,
+      options
+    );
+  }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setCity(e.target.searchInput.value);
-    weatherServices.getCurrentWeather(city).then((res) => {
+  useEffect(() => {
+    //current
+    weatherServices.getCurrentWeatherByCity(city).then((res) => {
       console.log(res.data);
       setCityData((prev) => [res.data]);
+      setCityName(res.data.name);
     });
-  };
 
-  // useEffect(() => {
-  //   //current
-  //   console.log(city);
-  //   weatherServices.getCurrentWeather(city).then((res) => {
-  //     console.log(res.data);
-  //     setCityData((prev) => [res.data]);
-  //   });
-
-  //   // // forecast;
-  //   weatherServices.getForecastWeatherbyCity(city).then((res) => {
-  //     console.log(res.data);
-  //     const reading = res.data.list.filter((dt) =>
-  //       dt.dt_txt.includes("18:00:00")
-  //     );
-  //     setCityData((we) =>
-  //       we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
-  //     );
-  //   });
-  // }, [city]);
+    // // forecast;
+    weatherServices.getForecastWeatherbyCity(city).then((res) => {
+      console.log(res.data);
+      const reading = res.data.list.filter((dt) =>
+        dt.dt_txt.includes("18:00:00")
+      );
+      setCityData((we) =>
+        we.concat(reading.filter((dat) => dat.dt !== we[0].dt))
+      );
+    });
+  }, [city]);
 
   const state = {
     labels: cityData.map((t) => new Date(t.dt * 1000).toDateString("en-US")),
@@ -113,16 +103,15 @@ function App() {
       <div className="w-full py-4 px-6">
         <div className="flex items-center">
           <span className="text-2xl font-extrabold">Your City</span>
-          <form action="" onSubmit={handleSubmit}>
+          <form action="">
             <input
               type="text"
               name="searchInput"
               placeholder="Enter your City"
               className="pr-6 pl-2 py-1 border border-gray-300 mx-6"
-              // value={searchInput}
-              // onChange={(e) => setSearchInput(e.target.value)}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
             />
-            <button>submit</button>
           </form>
           {console.log(city)}
         </div>

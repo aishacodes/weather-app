@@ -24,7 +24,8 @@ const getForecastWeatherbyCity = (city = "London") => {
   );
 };
 const weatherService = {
-  getCurrentWeather,
+  getCurrentWeatherByCity,
+  getCurrentWeatherByCoord,
   getForecastWeatherbyCity,
   getForecastWeatherbyCoord,
 };
