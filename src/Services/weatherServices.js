@@ -1,18 +1,16 @@
 import Axios from "axios";
 const apiKey = process.env.REACT_APP_API_KEY;
 
-const getCurrentWeather = (city = null, latitude, longitude) => {
-  let response;
-  if (city !== null) {
-    response = Axios.get(
-      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
-    );
-    return response;
-  }
-  response = Axios.get(
+const getCurrentWeatherByCoord = (latitude, longitude) => {
+  return Axios.get(
     `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=imperial&appid=${apiKey}`
   );
-  return response;
+};
+
+const getCurrentWeatherByCity = (city) => {
+  return Axios.get(
+    `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
+  );
 };
 
 const getForecastWeatherbyCoord = (latitude, longitude) => {
