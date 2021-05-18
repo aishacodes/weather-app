@@ -24,9 +24,15 @@ function App() {
       weatherServices
         .getForecastWeatherbyCoord(latitude, longitude)
         .then((res) => {
-          const reading = res.data.list.filter((dt) =>
+          let reading = res.data.list.filter((dt) =>
             dt.dt_txt.includes("18:00:00")
           );
+          reading = reading.filter((read) => {
+            return (
+              parseInt(new Date().getDate()) !==
+              parseInt(read.dt_txt.split(" ")[0].split("-")[2])
+            );
+          });
           setCityData((we) => we.concat(reading));
         });
     };
