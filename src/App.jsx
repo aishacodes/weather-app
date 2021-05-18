@@ -43,14 +43,12 @@ function App() {
         let reading = res.data.list.filter((dt) =>
           dt.dt_txt.includes("18:00:00")
         );
-        // reading =
-        //   reading.length &&
-        //   reading.filter((read) => {
-        //     return (
-        //       new Date(cityData[0].dt * 1000).toDateString("en-US") !==
-        //       new Date(read.dt * 1000).toDateString("en-US")
-        //     );
-        //   });
+        reading = reading.filter((read) => {
+          return (
+            parseInt(new Date().getDate()) !==
+            parseInt(read.dt_txt.split(" ")[0].split("-")[2])
+          );
+        });
         setCityData((we) => we.concat(reading));
       });
     };
@@ -81,8 +79,8 @@ function App() {
 
       reading = reading.filter((read) => {
         return (
-          new Date(cityData[0].dt * 1000).toDateString("en-US") !==
-          new Date(read.dt * 1000).toDateString("en-US")
+          parseInt(new Date().getDate()) !==
+          parseInt(read.dt_txt.split(" ")[0].split("-")[2])
         );
       });
       setCityData((we) => we.concat(reading));
