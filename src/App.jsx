@@ -19,6 +19,7 @@ function App() {
         .getCurrentWeatherByCoord(latitude, longitude)
         .then((res) => {
           setCityData((prev) => [res.data]);
+          setCityName(res.data.name);
         });
       //forecast
       weatherServices
